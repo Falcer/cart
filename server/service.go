@@ -4,6 +4,7 @@ package server
 type Service interface {
 	Login(login *Login) (*User, error)
 	Register(register *Register) (*User, error)
+	GetUsers() (*[]User, error)
 	GetProducts() (*[]Product, error)
 	GetProductByID(id string) (*Product, error)
 	GetCart(userID string) (*Cart, error)
@@ -26,6 +27,9 @@ func (s *service) Login(login *Login) (*User, error) {
 }
 func (s *service) Register(register *Register) (*User, error) {
 	return s.repo.Register(register)
+}
+func (s *service) GetUsers() (*[]User, error) {
+	return s.repo.GetUsers()
 }
 func (s *service) GetProducts() (*[]Product, error) {
 	return s.repo.GetProducts()

@@ -1,0 +1,22 @@
+### Index
+GET http://127.0.0.1:8080
+
+### Register
+POST http://127.0.0.1:8080/register
+Content-Type: application/json
+
+{
+  "username": "argana",
+  "fullname": "Argana Phangquestian"
+}
+
+### Login
+POST http://127.0.0.1:8080/login
+Content-Type: application/json
+
+{
+  "username": "argana"
+}
+
+### Get All Users
+GET http://127.0.0.1:8080/api/v1/users

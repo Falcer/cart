@@ -1,14 +1,19 @@
 package server
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 type (
 	// Login model
 	Login struct {
 		Username string `json:"username"`
-		Fullname string `json:"fullname"`
 	}
 	// Register model
 	Register struct {
 		Username string `json:"username"`
+		Fullname string `json:"fullname"`
 	}
 	// User model
 	User struct {
@@ -40,3 +45,25 @@ type (
 		IsPaid bool        `json:"id_paid"`
 	}
 )
+
+// Encode user
+func (u *User) Encode() []byte {
+	var res bytes.Buffer
+	encoder := gob.NewEncoder(&res)
+	err := encoder.Encode(u)
+	if err != nil {
+		return nil
+	}
+	return res.Bytes()
+}
+
+// Decode user
+func Decode(data []byte) *User {
+	var res User
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&res)
+	if err != nil {
+		return nil
+	}
+	return &res
+}
