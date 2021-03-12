@@ -60,13 +60,35 @@ func (r *repo) Login(login *Login) (*User, error) {
 	return user, nil
 }
 func (r *repo) Register(register *Register) (*User, error) {
+	// Check if Exist
+	err := r.badgerDB.View(func(txn *badger.Txn) error {
+		iopt := badger.DefaultIteratorOptions
+		itr := txn.NewIterator(iopt)
+		defer itr.Close()
+		for itr.Rewind(); itr.Valid(); itr.Next() {
+			err := itr.Item().Value(func(val []byte) error {
+				tmp := Decode(val)
+				if tmp.Username == register.Username {
+					return errors.New("Username Exist")
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
 	user := User{
 		ID:       ksuid.New().String(),
 		Username: register.Username,
 		Fullname: register.Fullname,
 	}
 	// Set New List into key `users`
-	err := r.badgerDB.Update(func(txn *badger.Txn) error {
+	err = r.badgerDB.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(user.ID), []byte(user.Encode()))
 		return err
 	})

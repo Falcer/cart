@@ -67,16 +67,14 @@ func main() {
 func (p *app) login(c *fiber.Ctx) error {
 	login := new(server.Login)
 	if err := c.BodyParser(login); err != nil {
-		log.Println(err)
 		return c.Status(500).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	res, err := p.service.Login(login)
 	if err != nil {
-		log.Println(err)
 		return c.Status(500).JSON(&fiber.Map{
-			"message": "Something went wrong!",
+			"message": err.Error(),
 		})
 	}
 	return c.Status(200).JSON(&fiber.Map{
@@ -88,16 +86,14 @@ func (p *app) login(c *fiber.Ctx) error {
 func (p *app) register(c *fiber.Ctx) error {
 	register := new(server.Register)
 	if err := c.BodyParser(register); err != nil {
-		log.Println(err)
 		return c.Status(500).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	res, err := p.service.Register(register)
 	if err != nil {
-		log.Println(err)
 		return c.Status(500).JSON(&fiber.Map{
-			"message": "Something went wrong!",
+			"message": err.Error(),
 		})
 	}
 	return c.Status(200).JSON(&fiber.Map{
@@ -109,7 +105,6 @@ func (p *app) register(c *fiber.Ctx) error {
 func (p *app) getAllUser(c *fiber.Ctx) error {
 	res, err := p.service.GetUsers()
 	if err != nil {
-		log.Println(err)
 		return c.Status(500).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
