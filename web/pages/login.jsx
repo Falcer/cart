@@ -1,14 +1,47 @@
+import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import axios from "axios";
 
 const Login = () => {
+  const [username, setUsername] = React.useState("");
+  const router = useRouter();
+
   const loginHandler = (e) => {
     e.preventDefault();
+    if (username === "") {
+      alert("Username can't blank");
+    }
+    axios
+      .post("http://54.169.75.182:8080/login", {
+        username,
+      })
+      .then((res) => {
+        alert(res.data.message);
+        if (res.data.data) {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("USER", JSON.stringify(res.data.data));
+            router.replace("/");
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   return (
     <>
       <div className="container">
         <form onSubmit={(e) => loginHandler(e)}>
-          <input type="text" placeholder="Username" />
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => {
+              // Check id valid
+              setUsername(e.target.value);
+            }}
+          />
           <button type="submit">Login</button>
           <span>
             Doesn't have an account ?{" "}
