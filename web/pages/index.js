@@ -1,9 +1,22 @@
 import React from "react";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import Product from "../components/Product";
 
 export default function Home() {
   const [products, setProducts] = React.useState([]);
+
+  React.useEffect(() => {
+    axios
+      .get("http://54.169.75.182:8080/api/v1/products")
+      .then((result) => {
+        setProducts(result.data.data);
+      })
+      .catch((err) => {
+        console.log(`Got some error ${err}`);
+      });
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -14,9 +27,9 @@ export default function Home() {
           products.map((item, key) => (
             <Product
               key={key}
-              name="ROG"
-              image_url="https://images.unsplash.com/photo-1615148536759-8fae933d8ff1?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max"
-              price={2_000_000}
+              name={item.name}
+              image_url={item.image_url}
+              price={item.price}
             />
           ))
         )}

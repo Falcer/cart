@@ -5,7 +5,7 @@ export default function Navbar() {
   return (
     <>
       <nav>
-        <Link href="keranjang">
+        <Link href="/keranjang">
           <a>Keranjang</a>
         </Link>
       </nav>
