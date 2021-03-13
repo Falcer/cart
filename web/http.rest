@@ -1,0 +1,49 @@
+### Index
+GET http://54.169.75.182:8080
+
+### Register
+POST http://54.169.75.182:8080/register
+Content-Type: application/json
+
+{
+  "username": "argana",
+  "fullname": "Argana Phangquestian"
+}
+
+### Login
+POST http://54.169.75.182:8080/login
+Content-Type: application/json
+
+{
+  "username": "argana"
+}
+
+### Get All Users
+GET http://54.169.75.182:8080/api/v1/users
+
+### Get All products
+GET http://54.169.75.182:8080/api/v1/products
+
+### Get product by ID
+GET http://54.169.75.182:8080/api/v1/products/1
+
+
+### Get All Cart for admin/Development purposes
+GET http://54.169.75.182:8080/api/v1/carts
+
+### Add Cart
+POST http://54.169.75.182:8080/api/v1/cart
+Content-Type: application/json
+
+{
+  "user_id": "1pgY2P40jF2BEJnBUM7sEbeH5io",
+  "product_id": "1"
+}
+
+### Paid Cart
+POST http://54.169.75.182:8080/api/v1/cart/paid
+Content-Type: application/json
+
+{
+  "user_id": "1pgY2P40jF2BEJnBUM7sEbeH5io"
+}
