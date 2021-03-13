@@ -5,10 +5,15 @@ import axios from "axios";
 
 const Login = () => {
   const [username, setUsername] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const router = useRouter();
 
   const loginHandler = (e) => {
     e.preventDefault();
+    if (loading) {
+      return;
+    }
+    setLoading(true);
     if (username === "") {
       alert("Username can't blank");
     }
@@ -27,6 +32,9 @@ const Login = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
   return (
@@ -42,7 +50,7 @@ const Login = () => {
               setUsername(e.target.value);
             }}
           />
-          <button type="submit">Login</button>
+          <button type="submit">{loading ? "Loading" : "Login"}</button>
           <span>
             Doesn't have an account ?{" "}
             <Link href="/register">

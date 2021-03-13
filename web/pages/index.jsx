@@ -5,8 +5,10 @@ import Product from "../components/Product";
 
 export default function Home() {
   const [products, setProducts] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
+    setLoading(true);
     axios
       .get("http://54.169.75.182:8080/api/v1/products")
       .then((result) => {
@@ -14,14 +16,18 @@ export default function Home() {
       })
       .catch((err) => {
         console.log(`Got some error ${err}`);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
   return (
     <>
       <Navbar />
+      {loading ? <h1>Loading . . .</h1> : null}
       <section>
-        {products.length === 0 ? (
+        {products.length === 0 && !loading ? (
           <h1>Products Empty</h1>
         ) : (
           products.map((item, key) => (

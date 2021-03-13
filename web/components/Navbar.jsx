@@ -10,6 +10,14 @@ export default function Navbar() {
     if (window !== undefined) {
       if (window.localStorage.getItem("USER") !== undefined) {
         setUser(JSON.parse(window.localStorage.getItem("USER")));
+        // "{"username": "argana"}"
+        // user.username
+        /*
+        {
+          "username": "argana"
+        }
+        var.username
+        */
       }
     }
   }, []);
