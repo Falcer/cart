@@ -1,30 +1,23 @@
-import Link from "next/link";
+import Navbar from "../components/Navbar";
+import Product from "../components/Product";
 
 export default function Home() {
   return (
     <>
-      <nav>
-        <Link href="keranjang">
-          <a>Keranjang</a>
-        </Link>
-      </nav>
-      <style jsx>
-        {`
-          nav {
-            padding: 24px 32px;
-          }
-          nav a {
-            background-color: rgba(200, 200, 200, 0.2);
-            padding: 16px 32px;
-            border-radius: 6px;
-            transition: all 0.25s ease;
-          }
-          nav a:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #fff;
-          }
-        `}
-      </style>
+      <Navbar />
+      <section>
+        <Product
+          name="ROG"
+          image_url="https://images.unsplash.com/photo-1615148536759-8fae933d8ff1?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max"
+          price={2_000_000}
+        />
+      </section>
+      <style jsx>{`
+        section {
+          margin: 56px 0 0;
+          padding: 0 96px;
+        }
+      `}</style>
     </>
   );
 }
