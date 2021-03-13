@@ -12,17 +12,28 @@ export default function Product(props) {
       </div>
       <style jsx>{`
         .product {
+          margin: 24px;
           width: 200px;
           border-radius: 6px;
           background-color: #fff;
-          box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.15);
+          box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.15);
           cursor: pointer;
+          transition: all 0.25s ease;
           overflow: hidden;
+        }
+        .product:hover {
+          box-shadow: 5px 5px 30px 0 rgba(0, 0, 0, 0.35);
+        }
+        .product:hover img {
+          transform: scale(1.1);
         }
         .product img {
           width: 100%;
           height: 200px;
           object-fit: cover;
+          transform: scale(1);
+          overflow: hidden;
+          transition: all 0.25s ease;
         }
         .product-desc {
           padding: 8px 32px;
