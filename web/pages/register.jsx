@@ -1,16 +1,63 @@
+import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import axios from "axios";
 
 const Register = () => {
+  const [username, setUsername] = React.useState("");
+  const [fullname, setFullname] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
   const registerHandler = (e) => {
     e.preventDefault();
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    axios
+      .post("http://54.169.75.182:8080/register", {
+        username,
+        fullname,
+      })
+      .then((res) => {
+        alert(res.data.message);
+        if (res.data.data) {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("USER", JSON.stringify(res.data.data));
+            router.replace("/");
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
   return (
     <>
       <div className="container">
         <form onSubmit={(e) => registerHandler(e)}>
-          <input type="text" placeholder="Username" />
-          <input type="text" placeholder="Fullname" />
-          <button type="submit">Register</button>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => {
+              // Check id valid
+              setUsername(e.target.value);
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Fullname"
+            value={fullname}
+            onChange={(e) => {
+              // Check id valid
+              setFullname(e.target.value);
+            }}
+          />
+          <button type="submit">{loading ? "Loading" : "Register"}</button>
           <span>
             Have an account ?{" "}
             <Link href="/login">
