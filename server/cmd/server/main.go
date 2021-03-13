@@ -149,14 +149,22 @@ func (p *app) getProductByID(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(200).JSON(&fiber.Map{
-		"message": "Get all product",
+		"message": fmt.Sprintf("Get product id : %s", c.Params("id")),
 		"data":    *res,
 	})
 }
 
 func (p *app) getAllCart(c *fiber.Ctx) error {
+	result, err := p.service.GetCarts()
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	data := *result
 	return c.Status(200).JSON(&fiber.Map{
 		"message": "Get all cart",
+		"data":    data,
 	})
 }
 
@@ -167,18 +175,54 @@ func (p *app) getUserCart(c *fiber.Ctx) error {
 }
 
 func (p *app) addProductToCart(c *fiber.Ctx) error {
+	body := new(server.AddCart)
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": "Something went wrong!",
+		})
+	}
+	err := p.service.AddCart(body.UserID, body.ProductID)
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
 	return c.Status(200).JSON(&fiber.Map{
-		"message": "Add product to cart",
+		"message": "Add product to cart successfully",
 	})
 }
 
 func (p *app) updateCart(c *fiber.Ctx) error {
+	body := new(server.ChangeAmountCart)
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": "Something went wrong!",
+		})
+	}
+	err := p.service.ChangeAmountCart(body.UserID, body.ProductID, body.Amount)
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
 	return c.Status(200).JSON(&fiber.Map{
-		"message": "Update product to cart",
+		"message": "Update product to cart successfully",
 	})
 }
 
 func (p *app) paidCart(c *fiber.Ctx) error {
+	body := new(server.PaidCart)
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": "Something went wrong!",
+		})
+	}
+	err := p.service.PaidCart(body.UserID)
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
 	return c.Status(200).JSON(&fiber.Map{
 		"message": "Cart paid",
 	})

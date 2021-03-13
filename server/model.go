@@ -31,6 +31,29 @@ type (
 		ImageURL string `json:"image_url"`
 	}
 
+	// GetCart model
+	GetCart struct {
+		UserID string `json:"user_id"`
+	}
+
+	// AddCart model
+	AddCart struct {
+		UserID    string `json:"user_id"`
+		ProductID string `json:"product_id"`
+	}
+
+	// ChangeAmountCart model
+	ChangeAmountCart struct {
+		UserID    string `json:"user_id"`
+		ProductID string `json:"product_id"`
+		Amount    uint8  `json:"amount"`
+	}
+
+	// PaidCart model
+	PaidCart struct {
+		UserID string `json:"user_id"`
+	}
+
 	// ItemCart model
 	ItemCart struct {
 		ID      string   `json:"id"`

@@ -25,4 +25,25 @@ GET http://127.0.0.1:8080/api/v1/users
 GET http://127.0.0.1:8080/api/v1/products
 
 ### Get product by ID
-GET http://127.0.0.1:8080/api/v1/products/1pfETyOJP9LFNYIsU8CgWYXaY82
+GET http://127.0.0.1:8080/api/v1/products/1
+
+
+### Get All Cart for admin/Development purposes
+GET http://127.0.0.1:8080/api/v1/carts
+
+### Add Cart
+POST http://127.0.0.1:8080/api/v1/cart
+Content-Type: application/json
+
+{
+  "user_id": "1pgY2P40jF2BEJnBUM7sEbeH5io",
+  "product_id": "5"
+}
+
+### Paid Cart
+POST http://127.0.0.1:8080/api/v1/cart/paid
+Content-Type: application/json
+
+{
+  "user_id": "1pgY2P40jF2BEJnBUM7sEbeH5io"
+}

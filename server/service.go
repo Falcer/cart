@@ -7,10 +7,11 @@ type Service interface {
 	GetUsers() (*[]User, error)
 	GetProducts() (*[]Product, error)
 	GetProductByID(id string) (*Product, error)
+	GetCarts() (*[]Cart, error)
 	GetCart(userID string) (*Cart, error)
 	AddCart(userID string, productID string) error
-	ChangeAmountCart(userID, cartID, productID string, amount uint8) error
-	PaidCart(userID, cartID string) error
+	ChangeAmountCart(userID, productID string, amount uint8) error
+	PaidCart(userID string) error
 }
 
 type service struct {
@@ -37,15 +38,18 @@ func (s *service) GetProducts() (*[]Product, error) {
 func (s *service) GetProductByID(id string) (*Product, error) {
 	return s.repo.GetProductByID(id)
 }
+func (s *service) GetCarts() (*[]Cart, error) {
+	return s.repo.GetCarts()
+}
 func (s *service) GetCart(userID string) (*Cart, error) {
 	return s.repo.GetCart(userID)
 }
 func (s *service) AddCart(userID string, productID string) error {
 	return s.repo.AddCart(userID, productID)
 }
-func (s *service) ChangeAmountCart(userID, cartID, productID string, amount uint8) error {
-	return s.repo.ChangeAmountCart(userID, cartID, productID, amount)
+func (s *service) ChangeAmountCart(userID, productID string, amount uint8) error {
+	return s.repo.ChangeAmountCart(userID, productID, amount)
 }
-func (s *service) PaidCart(userID, cartID string) error {
-	return s.repo.PaidCart(userID, cartID)
+func (s *service) PaidCart(userID string) error {
+	return s.repo.PaidCart(userID)
 }
