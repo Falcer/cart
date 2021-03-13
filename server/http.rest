@@ -37,7 +37,7 @@ Content-Type: application/json
 
 {
   "user_id": "1pgY2P40jF2BEJnBUM7sEbeH5io",
-  "product_id": "5"
+  "product_id": "1"
 }
 
 ### Paid Cart

@@ -11,6 +11,7 @@ import (
 	"github.com/dgraph-io/badger/v3"
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type app struct {
@@ -32,6 +33,10 @@ func main() {
 		DB:       0,
 	})
 	fiberApp := fiber.New()
+	fiberApp.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 	repo := server.NewRepository(badgerDB, redisClient)
 	service := server.NewService(repo)
 

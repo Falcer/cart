@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -232,7 +233,28 @@ func (r *repo) GetProductByID(id string) (*Product, error) {
 	return nil, errors.New("Product not found")
 }
 func (r *repo) GetCarts() (*[]Cart, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	var carts []Cart
+
+	t, err := r.redis.Do(ctx, "KEYS", "*").Result()
+	switch t := t.(type) {
+	case []interface{}:
+		for _, value := range t {
+			val, err := r.redis.Get(ctx, fmt.Sprintf("%s", value)).Result()
+			if err != nil {
+				return nil, err
+			}
+			res, err := DecodeCart(val)
+			if err != nil {
+				return nil, err
+			}
+			carts = append(carts, *res)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
 	return &carts, nil
 }
 func (r *repo) GetCart(userID string) (*Cart, error) {
