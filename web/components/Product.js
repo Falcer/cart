@@ -16,16 +16,18 @@ export default function Product(props) {
           width: 200px;
           border-radius: 6px;
           background-color: #fff;
-          box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.15);
+          box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.05);
           cursor: pointer;
+          transform: scale(1);
           transition: all 0.25s ease;
           overflow: hidden;
         }
         .product:hover {
+          transform: scale(1.1);
           box-shadow: 5px 5px 30px 0 rgba(0, 0, 0, 0.35);
         }
         .product:hover img {
-          transform: scale(1.1);
+          transform: scale(1.0075);
         }
         .product img {
           width: 100%;
