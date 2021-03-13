@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -316,9 +315,6 @@ func (r *repo) AddCart(userID string, productID string) error {
 			})
 		}
 		cart.Items = &products
-		for _, v := range *cart.Items {
-			fmt.Printf("Name : %s , Amount : %d\n", v.Product.Name, v.Amount)
-		}
 		enc, err := cart.Encode()
 		if err != nil {
 			return err
@@ -376,26 +372,12 @@ func (r *repo) ChangeAmountCart(userID, productID string, amount uint8) error {
 func (r *repo) PaidCart(userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	// res, err := r.redis.Del(ctx, userID).Result()
-	val, err := r.redis.Get(ctx, userID).Result()
-	if err == redis.Nil {
-		return errors.New("Cart not found")
-	} else if err != nil {
+	res, err := r.redis.Del(ctx, userID).Result()
+	if res < 1 {
+		return errors.New("Cart already empty")
+	}
+	if err != nil {
 		return err
-	} else {
-		cart, err := DecodeCart(val)
-		if err != nil {
-			return err
-		}
-		cart.IsPaid = true
-		enc, err := cart.Encode()
-		if err != nil {
-			return err
-		}
-		err = r.redis.Set(ctx, userID, *enc, 0).Err()
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }

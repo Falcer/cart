@@ -80,13 +80,13 @@ func main() {
 func (p *app) login(c *fiber.Ctx) error {
 	login := new(server.Login)
 	if err := c.BodyParser(login); err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	res, err := p.service.Login(login)
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -99,13 +99,13 @@ func (p *app) login(c *fiber.Ctx) error {
 func (p *app) register(c *fiber.Ctx) error {
 	register := new(server.Register)
 	if err := c.BodyParser(register); err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	res, err := p.service.Register(register)
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -118,7 +118,7 @@ func (p *app) register(c *fiber.Ctx) error {
 func (p *app) getAllUser(c *fiber.Ctx) error {
 	res, err := p.service.GetUsers()
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
@@ -131,7 +131,7 @@ func (p *app) getAllUser(c *fiber.Ctx) error {
 func (p *app) getAllProduct(c *fiber.Ctx) error {
 	res, err := p.service.GetProducts()
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -144,7 +144,7 @@ func (p *app) getAllProduct(c *fiber.Ctx) error {
 func (p *app) getProductByID(c *fiber.Ctx) error {
 	res, err := p.service.GetProductByID(c.Params("id"))
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -157,7 +157,7 @@ func (p *app) getProductByID(c *fiber.Ctx) error {
 func (p *app) getAllCart(c *fiber.Ctx) error {
 	result, err := p.service.GetCarts()
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -177,13 +177,13 @@ func (p *app) getUserCart(c *fiber.Ctx) error {
 func (p *app) addProductToCart(c *fiber.Ctx) error {
 	body := new(server.AddCart)
 	if err := c.BodyParser(body); err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	err := p.service.AddCart(body.UserID, body.ProductID)
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -195,13 +195,13 @@ func (p *app) addProductToCart(c *fiber.Ctx) error {
 func (p *app) updateCart(c *fiber.Ctx) error {
 	body := new(server.ChangeAmountCart)
 	if err := c.BodyParser(body); err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	err := p.service.ChangeAmountCart(body.UserID, body.ProductID, body.Amount)
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
@@ -213,13 +213,13 @@ func (p *app) updateCart(c *fiber.Ctx) error {
 func (p *app) paidCart(c *fiber.Ctx) error {
 	body := new(server.PaidCart)
 	if err := c.BodyParser(body); err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": "Something went wrong!",
 		})
 	}
 	err := p.service.PaidCart(body.UserID)
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
+		return c.Status(200).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
