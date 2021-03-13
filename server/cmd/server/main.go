@@ -9,6 +9,7 @@ import (
 
 	"github.com/Falcer/cart/server"
 	"github.com/dgraph-io/badger/v3"
+	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,13 +17,22 @@ type app struct {
 	service server.Service
 }
 
+func init() {
+
+}
+
 func main() {
-	db, err := badger.Open(badger.DefaultOptions("./database"))
+	badgerDB, err := badger.Open(badger.DefaultOptions("./database"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 	fiberApp := fiber.New()
-	repo := server.NewRepository(db)
+	repo := server.NewRepository(badgerDB, redisClient)
 	service := server.NewService(repo)
 
 	app := &app{service: service}
@@ -40,6 +50,8 @@ func main() {
 	api := fiberApp.Group("/api/v1")
 	api.Get("/users", app.getAllUser)
 	api.Get("/carts", app.getAllCart)
+	api.Get("/products", app.getAllProduct)
+	api.Get("/products/:id", app.getProductByID)
 	api.Get("/cart", app.getUserCart)
 	api.Post("/cart", app.addProductToCart)
 	api.Put("/cart", app.updateCart)
@@ -55,9 +67,10 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	_ = <-c
-	fmt.Println("Gracefully shutting down...")
-	defer db.Close()
+	<-c
+	fmt.Println("\nGracefully shutting down...")
+	defer badgerDB.Close()
+	defer redisClient.Close()
 	_ = fiberApp.Shutdown()
 
 	fmt.Println("Running cleanup tasks...")
@@ -111,6 +124,32 @@ func (p *app) getAllUser(c *fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(&fiber.Map{
 		"message": "Get all user",
+		"data":    *res,
+	})
+}
+
+func (p *app) getAllProduct(c *fiber.Ctx) error {
+	res, err := p.service.GetProducts()
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(&fiber.Map{
+		"message": "Get all product",
+		"data":    *res,
+	})
+}
+
+func (p *app) getProductByID(c *fiber.Ctx) error {
+	res, err := p.service.GetProductByID(c.Params("id"))
+	if err != nil {
+		return c.Status(500).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(&fiber.Map{
+		"message": "Get all product",
 		"data":    *res,
 	})
 }

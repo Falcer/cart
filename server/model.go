@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 )
 
 type (
@@ -46,6 +47,25 @@ type (
 	}
 )
 
+// Encode Cart
+func (c *Cart) Encode() (*string, error) {
+	res, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	result := string(res)
+	return &result, nil
+}
+
+// Decode Cart
+func DecodeCart(data string) (*Cart, error) {
+	var cart Cart
+	if err := json.Unmarshal([]byte(data), &cart); err != nil {
+		return nil, err
+	}
+	return &cart, nil
+}
+
 // Encode user
 func (u *User) Encode() []byte {
 	var res bytes.Buffer
@@ -57,8 +77,8 @@ func (u *User) Encode() []byte {
 	return res.Bytes()
 }
 
-// Decode user
-func Decode(data []byte) *User {
+// DecodeUser user
+func DecodeUser(data []byte) *User {
 	var res User
 	decoder := gob.NewDecoder(bytes.NewReader(data))
 	err := decoder.Decode(&res)

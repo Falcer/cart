@@ -1,9 +1,12 @@
 package server
 
 import (
+	"context"
 	"errors"
+	"time"
 
 	"github.com/dgraph-io/badger/v3"
+	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/ksuid"
 )
 
@@ -77,6 +80,7 @@ type Repository interface {
 	Login(login *Login) (*User, error)
 	Register(register *Register) (*User, error)
 	GetUsers() (*[]User, error)
+	GetUserByID(userID string) (*User, error)
 	GetProducts() (*[]Product, error)
 	GetProductByID(id string) (*Product, error)
 	GetCart(userID string) (*Cart, error)
@@ -87,12 +91,14 @@ type Repository interface {
 
 type repo struct {
 	badgerDB *badger.DB
+	redis    *redis.Client
 }
 
 // NewRepository instance
-func NewRepository(db *badger.DB) Repository {
+func NewRepository(badgerDB *badger.DB, redisClient *redis.Client) Repository {
 	return &repo{
-		badgerDB: db,
+		badgerDB: badgerDB,
+		redis:    redisClient,
 	}
 }
 func (r *repo) Login(login *Login) (*User, error) {
@@ -103,7 +109,7 @@ func (r *repo) Login(login *Login) (*User, error) {
 		defer itr.Close()
 		for itr.Rewind(); itr.Valid(); itr.Next() {
 			err := itr.Item().Value(func(val []byte) error {
-				tmp := Decode(val)
+				tmp := DecodeUser(val)
 				if tmp.Username == login.Username {
 					user = tmp
 					return nil
@@ -132,9 +138,9 @@ func (r *repo) Register(register *Register) (*User, error) {
 		defer itr.Close()
 		for itr.Rewind(); itr.Valid(); itr.Next() {
 			err := itr.Item().Value(func(val []byte) error {
-				tmp := Decode(val)
+				tmp := DecodeUser(val)
 				if tmp.Username == register.Username {
-					return errors.New("Username Exist")
+					return errors.New("User already exist")
 				}
 				return nil
 			})
@@ -170,7 +176,7 @@ func (r *repo) GetUsers() (*[]User, error) {
 		defer itr.Close()
 		for itr.Rewind(); itr.Valid(); itr.Next() {
 			err := itr.Item().Value(func(val []byte) error {
-				users = append(users, *Decode(val))
+				users = append(users, *DecodeUser(val))
 				return nil
 			})
 			if err != nil {
@@ -183,6 +189,35 @@ func (r *repo) GetUsers() (*[]User, error) {
 		return nil, err
 	}
 	return &users, nil
+}
+func (r *repo) GetUserByID(userID string) (*User, error) {
+	var user *User
+	err := r.badgerDB.View(func(txn *badger.Txn) error {
+		iopt := badger.DefaultIteratorOptions
+		itr := txn.NewIterator(iopt)
+		defer itr.Close()
+		for itr.Rewind(); itr.Valid(); itr.Next() {
+			err := itr.Item().Value(func(val []byte) error {
+				tmp := DecodeUser(val)
+				if tmp.ID == userID {
+					user = tmp
+					return nil
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("User not found")
+	}
+	return user, nil
 }
 func (r *repo) GetProducts() (*[]Product, error) {
 	return &products, nil
@@ -199,11 +234,114 @@ func (r *repo) GetCart(userID string) (*Cart, error) {
 	return nil, nil
 }
 func (r *repo) AddCart(userID string, productID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	product, err := r.GetProductByID(productID)
+	if err != nil {
+		return err
+	}
+	val, err := r.redis.Get(ctx, userID).Result()
+	if err == redis.Nil {
+		// Add New Key Value
+		user, err := r.GetUserByID(userID)
+		if err != nil {
+			return err
+		}
+		items := []ItemCart{
+			{
+				ID:      ksuid.New().String(),
+				Product: product,
+				Amount:  1,
+			},
+		}
+		cart := Cart{
+			ID:     ksuid.New().String(),
+			IsPaid: false,
+			User:   user,
+			Items:  &items,
+		}
+		err = r.redis.Set(ctx, userID, cart, 0).Err()
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	} else {
+		// Add into cart
+		cart, err := DecodeCart(val)
+		if err != nil {
+			return err
+		}
+		products := *(cart).Items
+		products = append(products, ItemCart{
+			ID:      ksuid.New().String(),
+			Product: product,
+			Amount:  1,
+		})
+		cart.Items = &products
+		err = r.redis.Set(ctx, userID, *cart, 0).Err()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 func (r *repo) ChangeAmountCart(userID, cartID, productID string, amount uint8) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	val, err := r.redis.Get(ctx, userID).Result()
+	if err == redis.Nil {
+		return errors.New("Cart not found")
+	} else if err != nil {
+		return err
+	} else {
+		// Change Amount of Cart
+		cart, err := DecodeCart(val)
+		if err != nil {
+			return err
+		}
+		// Find ItemCart with ProductID
+		products := *(cart).Items
+		find := false
+		// Linear Search ItemCart
+		for _, v := range products {
+			// If ItemCart match with ProductID
+			if v.Product.ID == productID {
+				// Change Amount of ItemCart
+				v.Amount = amount
+				// And change `find` to true
+			}
+		}
+		// If `find` is false ItemCart is not found
+		if !find {
+			return errors.New("Product not found")
+		}
+		cart.Items = &products
+		err = r.redis.Set(ctx, userID, *cart, 0).Err()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 func (r *repo) PaidCart(userID, cartID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	val, err := r.redis.Get(ctx, userID).Result()
+	if err == redis.Nil {
+		return errors.New("Cart not found")
+	} else if err != nil {
+		return err
+	} else {
+		cart, err := DecodeCart(val)
+		if err != nil {
+			return err
+		}
+		cart.IsPaid = true
+		err = r.redis.Set(ctx, userID, *cart, 0).Err()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
