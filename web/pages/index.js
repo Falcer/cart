@@ -8,7 +8,7 @@ export default function Home() {
     <>
       <Navbar />
       <section>
-        {products.length == 0 ? (
+        {products.length === 0 ? (
           <h1>Products Empty</h1>
         ) : (
           products.map((item, key) => (
